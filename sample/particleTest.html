@@ -45,11 +45,12 @@
     <script src="../three.js"></script>
     <script src="../lib/OrbitControls.js"></script>
 
-    <script src="../src/threeExplosionParticle.js"></script>
+    <!-- 追加点その１。プラグインを読む -->
+    <script src="../src/threeJenParticle.js"></script>
 
     <script src="../lib/Detector.js"></script>
     <script src="../lib/stats.min.js"></script>
-    <script src='../lib/dat.gui.min.js'></script>
+    <script src="../lib/dat.gui.min.js"></script>
     <script>
 
         var StringBuffer = function (string) {
@@ -66,7 +67,11 @@
         var gui = new dat.GUI();
   
         var d = new Date();
-        var LastDateTime = null;
+
+        scene = new THREE.Scene();
+        //追加点その２。オブジェクトを用意。後々アクセスできるように、変数内ではなく、こんな感じでnullで用意
+        var jenP = null;
+
         init();
 
         function init() {
@@ -77,11 +82,11 @@
 
             document.body.appendChild(container);
             camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 2000);
-            scene = new THREE.Scene();
+
             
             // grid
             var gridHelper = new THREE.GridHelper(14, 1, 0x303030, 0x303030);
-            gridHelper.position.set(0, -0.04, 0);
+            gridHelper.position.set(0, 0, 0);
             scene.add(gridHelper);
             // stats
             stats = new Stats();
@@ -93,7 +98,7 @@
             renderer = new THREE.WebGLRenderer();
             renderer.setPixelRatio(window.devicePixelRatio);
             renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.setClearColor(0x666666);
+            renderer.setClearColor(0x000000);
             container.appendChild(renderer.domElement);
 		    if ( renderer.extensions.get( 'ANGLE_instanced_arrays' ) === false ) {
 				// document.getElementById( "notSupported" ).style.display = "";
@@ -101,13 +106,15 @@
 			}
 
             controls = new THREE.OrbitControls(camera, renderer.domElement);
-            controls.target.set(0, 12, 0);
-            camera.position.set(2, 18, 28);
+            controls.target.set(2, 1, 0);
+            camera.position.set(-1, 2, 5);
             camera.up.set(0, 1, 0);
 
-            /////////////
-            const jenP = new jenParticle();
+            //////////////////////////////////////////////////
+            //追加点その３。new宣言をして、sceneにaddする。
+            jenP = new jenParticle();
             scene.add(jenP);
+            //////////////////////////////////////////
 
             controls.update();
             window.addEventListener('resize', onWindowResize, false);
@@ -123,9 +130,9 @@
         function animate() {
 
             requestAnimationFrame(animate);
-            var nowTime = Date.now();
-            var dulTime = nowTime - LastDateTime;
-            LastDateTime = nowTime;
+
+            // 追加点その４。パーティクルを追加する。１フレームで追加する数が引数となる。
+            jenP.appearsParticle(10);
 
             stats.update();
             render();

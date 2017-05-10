@@ -8,12 +8,12 @@
  */
 
 
-class jenParticle extends THREE.Object3D{
+class jenParticle extends THREE.Object3D {
     // コンストラクタ
     constructor(Texloader, _option) {
         super();
         this.particleCount = 7500;	//これがパーティクルの作成最大数。多すぎると死ぬ
-
+        this.clock = new THREE.Clock();
         /*
         var vertexShader = gl.createShader(gl.VERTEX_SHADER);
         gl.shaderSource(vertexShader, this.getVshader());
@@ -80,9 +80,45 @@ class jenParticle extends THREE.Object3D{
         return this;
     }
 
-    updater() {
+    appearsParticle(_cnt) {
+        let pops = 0;
+        for (let i = 0; i < this.particleCount; i++) {
+            if (this.timeArray[i] == 0.0) {
+                this.timeArray[i] = 1.0;
+                //初期サイズと移動方向を決める
+                this.scaleArray[i] = Math.random() * 0.1;
 
+                this.vectArray[i * 3 + 0] = (Math.random() - 0.5);
+                this.vectArray[i * 3 + 1] = (Math.random() - 0.5);
+                this.vectArray[i * 3 + 2] = (Math.random() - 0.5);
+
+                this.colArray[i * 3 + 0] = Math.random();
+                this.colArray[i * 3 + 1] = Math.random();
+                this.colArray[i * 3 + 2] = Math.random();
+
+                pops++;
+                if (_cnt < pops) { break; }
+            }
+        }
+    }
+
+    ///////////////////////
+    updater() {
         // 1粒毎のアップデート
+        var delta = this.clock.getDelta();
+        var onCount = 0;
+        for (let i = 0; i < this.particleCount; i++) {
+            if (this.timeArray[i] > 0.0) {
+                onCount++;
+                this.timeArray[i] += delta;
+                if (this.timeArray[i] > 2.0) {
+                    //1秒経過していたら、消滅させる。
+                    this.timeArray[i] = 0.0;
+                    this.scaleArray[i] = 0.0;
+                }
+            }
+        }
+
         this.geo.attributes.translate.needsUpdate = true;
         this.geo.attributes.col.needsUpdate = true;
         this.geo.attributes.movevect.needsUpdate = true;
@@ -117,7 +153,7 @@ class jenParticle extends THREE.Object3D{
 
             vec4 mvPosition = modelViewMatrix * vec4( translate, 1.0 );
             vScale = scale;
-            mvPosition.xyz += position * (scale + time * 0.001) + (movevect * time );
+            mvPosition.xyz += position * (scale + time * 0.1) + (movevect * time * 2.0 );
             vUv = uv;
             gl_Position = projectionMatrix * mvPosition;
             vCol = col;
@@ -139,8 +175,9 @@ class jenParticle extends THREE.Object3D{
         varying float vTime;
 
         void main() {
-            vec4 diffuseColor = texture2D( map, vUv );
-            gl_FragColor = vec4( diffuseColor.xyz * vCol, diffuseColor.w * (1.0 - vTime / 1000.0) );
+            // vec4 diffuseColor = texture2D( map, vUv );
+            vec4 diffuseColor = vec4(0.5,0.5,1.0,1.0);
+            gl_FragColor = vec4( diffuseColor.xyz * vCol, 1.0 - diffuseColor.w * vTime * 0.5 );
 
             //if ( diffuseColor.w < 0.5 ) discard;
         }
