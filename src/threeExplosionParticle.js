@@ -88,7 +88,7 @@ class jenParticle extends THREE.Object3D{
         this.geo.attributes.movevect.needsUpdate = true;
         this.geo.attributes.scale.needsUpdate = true;
         this.geo.attributes.time.needsUpdate = true;
-        THREE.Object3D.prototype.updateMatrixWorld.call(this);
+        super.updateMatrixWorld.call(this);
         console.log('OK');
     }
 
