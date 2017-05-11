@@ -106,8 +106,8 @@
 			}
 
             controls = new THREE.OrbitControls(camera, renderer.domElement);
-            controls.target.set(2, 1, 0);
-            camera.position.set(-1, 2, 5);
+            controls.target.set(0, 0, 0);
+            camera.position.set(0, 2, 5);
             camera.up.set(0, 1, 0);
 
             //////////////////////////////////////////////////
@@ -132,7 +132,7 @@
             requestAnimationFrame(animate);
 
             // 追加点その４。パーティクルを追加する。１フレームで追加する数が引数となる。
-            jenP.appearsParticle(10);
+            jenP.appearsParticle(5);
 
             stats.update();
             render();
