@@ -1,0 +1,256 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>three.js webgl - X-File loader</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+
+    <style>
+        body {
+            font-family: Monospace;
+            background-color: #000;
+            color: #fff;
+            margin: 0px;
+            overflow: hidden;
+        }
+
+        #info {
+            color: #fff;
+            position: absolute;
+            top: 10px;
+            width: 100%;
+            text-align: center;
+            z-index: 100;
+            display: block;
+        }
+
+        #info a,
+        .button {
+            color: #f00;
+            font-weight: bold;
+            text-decoration: underline;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <!--
+    <div id="info">
+        <a href="http://threejs.org" target="_blank">three.js</a> Particle Effect Test<br />
+    </div>
+    -->
+    <div id="canvase3d"></div>
+
+    <script src="../three.min.js"></script>
+    <script src="../lib/OrbitControls.js"></script>
+    <script src="../lib/dat.gui.min.js"></script>
+    <!-- 追加点その１。プラグインを読む -->
+    <script src="../threeJenParticle.js"></script>
+
+    <script src="../lib/Detector.js"></script>
+    <script src="../lib/stats.min.js"></script>
+    <script>
+        var StringBuffer = function (string) {
+            this.buffer = [];
+            this.append = function (string) { this.buffer.push(string); return this; };
+            this.toString = function () { return this.buffer.join(''); };
+            if (string) { this.append(string); }
+        };
+
+        if (!Detector.webgl) Detector.addGetWebGLMessage();
+        var container, stats, controls;
+        var camera, scene, renderer;
+        var clock = new THREE.Clock();
+
+        scene = new THREE.Scene();
+
+        var jenP = null;
+        var jenP2 = null;
+
+        var basePoses = [];
+
+        var particleColors = [new THREE.Color(1.0, 1.0, 0.5), new THREE.Color(0.8, 0.4, 0.0), new THREE.Color(0.2, 0.0, 0.0)];
+
+        var colors = {
+            color0: [particleColors[0].r * 255, particleColors[0].g * 255, particleColors[0].b * 255],
+            color1: [particleColors[1].r * 255, particleColors[1].g * 255, particleColors[1].b * 255],
+            color2: [particleColors[2].r * 255, particleColors[2].g * 255, particleColors[2].b * 255]
+        }
+
+        var basicOption = {
+            isAlphaAdd: false,
+            isTextured: true,
+            colors: particleColors,
+            gravity: new THREE.Vector3(0.0, 0.1, 0.0),
+            vectorTransform: false,
+            blurPower: 0.0,
+            gravity_e: -0.01
+        };
+
+        var appearsOption = {
+            //basePos: basePoses[i],
+            addFrameCount: 1,
+            scale:  2.0,
+            scaleRandom: 0.3,
+            vect: new THREE.Vector3(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5).normalize(),
+            speed: 0.1,
+            explose: 0.1,
+            viscosity: 0.9,
+            lifeTimeFactor: (Math.random() - 0.5) * 0.5 + 1.0
+        };
+
+        init();
+
+        function init() {
+
+            container = document.createElement('div');
+
+            document.body.appendChild(container);
+            camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 2000);
+
+            // grid
+            var gridHelper = new THREE.GridHelper(14, 1, 0x303030, 0x303030);
+            gridHelper.position.set(0, 0, 0);
+            scene.add(gridHelper);
+            // stats
+            stats = new Stats();
+            container.appendChild(stats.dom);
+
+            renderer = new THREE.WebGLRenderer();
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setClearColor(0x222222);
+            container.appendChild(renderer.domElement);
+            if (renderer.extensions.get('ANGLE_instanced_arrays') === false) {
+                // document.getElementById( "notSupported" ).style.display = "";
+                return false;
+            }
+
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.target.set(0, 0, 0);
+            camera.position.set(0, 2, 30);
+            camera.up.set(0, 1, 0);
+
+            //////////////////////////////////////////////////
+            //追加点その３。new宣言をして、sceneにaddする。
+            jenP = new jenParticle(basicOption);
+            scene.add(jenP);
+
+            /*
+            jenP2 = new jenParticle({
+                isAlphaAdd: true,
+                isTextured: true,
+                colors: [new THREE.Color(1.0, 1.0, 0.5), new THREE.Color(0.8, 0.4, 0.0), new THREE.Color(0.2, 0.0, 0.0)],
+                gravity: new THREE.Vector3(0.0, 0.01, 0.0),
+                vectorTransform: true
+            });
+            scene.add(jenP2);
+            */
+
+            initDat();
+
+            controls.update();
+            window.addEventListener('resize', onWindowResize, false);
+            animate();
+
+        }
+
+        //
+        function animate() {
+
+            requestAnimationFrame(animate);
+
+            // 追加点その４。パーティクルを追加する。１フレームで追加する数が引数となる。
+            jenP.appearsParticle(appearsOption.addFrameCount, appearsOption);
+            /*
+            jenP2.appearsParticle(1,
+                {
+                    //basePos: basePoses[i],
+                    scale: Math.random() * 0.3, // 大きさのブレを少なくする
+                    vect: new THREE.Vector3(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5),
+                    speed: 0.3,
+                    explose: 0.1,
+                    viscosity: 0.8,
+                    lifeTimeFactor: (Math.random() - 0.5) * 0.5 + 1.0
+                }
+            );
+            */
+            stats.update();
+            render();
+        }
+
+        function render() {
+            renderer.render(scene, camera);
+        }
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        function initDat() {
+
+            var gui = new dat.GUI();
+
+            //////////////////////////////
+            // 初期値のインスタンスを紐付ける
+            var f1 = gui.addFolder('Basic Option');
+
+            function colChange() {
+                var cols = [
+                    new THREE.Vector3(colors.color0[0] / 255.0, colors.color0[1] / 255.0, colors.color0[2] / 255.0),
+                    new THREE.Vector3(colors.color1[0] / 255.0, colors.color1[1] / 255.0, colors.color1[2] / 255.0),
+                    new THREE.Vector3(colors.color2[0] / 255.0, colors.color2[1] / 255.0, colors.color2[2] / 255.0)
+                ];
+                jenP.material.uniforms.colors.value = cols;
+            }
+
+            var c0 = f1.addColor(colors, 'color0');
+            c0.onChange(function (value) { colChange(); });
+            var c1 = f1.addColor(colors, 'color1');
+            c1.onChange(function (value) { colChange(); });
+            var c2 = f1.addColor(colors, 'color2');
+            c2.onChange(function (value) { colChange(); });
+
+            var cAlpha = f1.add(basicOption, 'isAlphaAdd');
+            cAlpha.onFinishChange(function (value) {
+                jenP.material.blending = value ? THREE.AdditiveBlending : THREE.NormalBlending;
+                jenP.material.needsUpdate = true;
+            });
+            var cTex = f1.add(basicOption, 'isTextured');
+            cTex.onFinishChange(function (value) {
+                jenP.material.uniforms.map.value = value ? jenP.noiseTexture : jenP.dummyTexture;
+                jenP.material.needsUpdate = true;
+            });            
+            var cGrav = f1.add(basicOption, 'gravity_e', -0.5, 0.5).step(0.01);
+            cGrav.onChange(function (value) {
+                var v = new THREE.Vector3(0,value,0);
+                jenP.material.uniforms.gravity.value = v;
+                jenP.material.needsUpdate = true;
+            });
+            var cVTrans = f1.add(basicOption, 'blurPower', 0.01, 1.0).step(0.01);
+            cVTrans.onChange(function (value) {
+                jenP.material.uniforms.blurPower.value = value;
+                jenP.material.needsUpdate = true;
+            });
+            
+            ///////////////////////////
+            var f2 = gui.addFolder('Frame appears Option');
+
+            f2.add(appearsOption, 'addFrameCount', 1, 5).step(1);
+            f2.add(appearsOption, 'scale', 0.1, 5.0).step(0.01);
+            f2.add(appearsOption, 'scaleRandom', 0.0, 3.0).step(0.01);
+            f2.add(appearsOption, 'speed', 0.1, 5.0);
+            f2.add(appearsOption, 'explose', 0.0, 1.0).step(0.01);
+            f2.add(appearsOption, 'viscosity', 0.800, 1.200).step(0.01);
+            f2.open();
+            f1.open();
+            //////////////////////////////////////////
+        }
+    </script>
+
+</body>
+
+</html>
