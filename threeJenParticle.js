@@ -23,7 +23,8 @@ class jenParticle extends THREE.Object3D {
             isTextured = true,
             colors = [new THREE.Color(1.0, 1.0, 0.5), new THREE.Color(0.8, 0.4, 0.0), new THREE.Color(0.2, 0.0, 0.0)],
             gravity = new THREE.Vector3(0.0, -0.01, 0.0),
-            vectorTransform = true
+            vectorTransform = true,
+            blurPower = 1.0
         } = _option;
 
         this.particleCount = 8191;	//これがパーティクルの作成最大数。多すぎると死ぬ
@@ -88,7 +89,7 @@ class jenParticle extends THREE.Object3D {
                 time: { value: 0.0 },
                 colors: { type: "v3v", value: colors },
                 gravity: { type: "v3", value: gravity },
-                blurPower: { value: vectorTransform ? 1.0 : 0.0 }
+                blurPower: { value: blurPower }
             },
             vertexShader: this.getVshader(),
             fragmentShader: this.getFshader(),
@@ -372,7 +373,8 @@ class jenParticle extends THREE.Object3D {
             vec3 PA = pass1Pos.xyz - pass0Pos.xyz;
             vec3 BP = pass2Pos.xyz - pass1Pos.xyz;
             vec3 Badd = BP * 3.0 * speed;  // ホントはblurPower
-            float f = min(length(BA) / length(PA), 1.0);
+            float f = length(BA) / length(PA);
+            f = min(pow(f,2.0), 1.0);
 
             gl_Position = vec4(mix(pass0Pos.x,pass2Pos.x + Badd.x, f), mix(pass0Pos.y,pass2Pos.y+ Badd.y, f), mix(pass0Pos.z,pass2Pos.z+ Badd.z, f), pass2Pos.w);
 

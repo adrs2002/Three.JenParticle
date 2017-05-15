@@ -23,6 +23,7 @@
             text-align: center;
             z-index: 100;
             display: block;
+            user-select: none;
         }
 
         #info a,
@@ -31,16 +32,32 @@
             font-weight: bold;
             text-decoration: underline;
             cursor: pointer;
+            user-select: contain;
+        }
+        
+        #.futter{
+        	color: #fff;
+            position: absolute;
+            bottom: 30px;
+            width: 100%;
+            text-align: center;
+            z-index: 110;
+            display: block;
         }
     </style>
 </head>
 
 <body>
-    <!--
+   
     <div id="info">
         <a href="http://threejs.org" target="_blank">three.js</a> Particle Effect Test<br />
     </div>
-    -->
+ 
+     <div class="futter">
+        <input type="button" value=" Code Generate（コード生成）" onclick="generate()"><br>
+          <textarea id="codeput" name="codeput" cols=100 rows=4></textarea>
+    </div>
+ 
     <div id="canvase3d"></div>
 
     <script src="../three.min.js"></script>
@@ -248,6 +265,40 @@
             f2.open();
             f1.open();
             //////////////////////////////////////////
+        }
+        
+        function generate() {        	
+        	var txt = document.getElementById ('codeput');
+			txt.value =  `
+        	// initialize
+        	var jenP = null;
+        	
+        	// after created scene 
+        	jenP = new jenParticle({
+                isAlphaAdd: ${basicOption.isAlphaAdd},
+                isTextured: ${basicOption.isTextured},
+        		colors: [new THREE.Color(${particleColors[0].r}, ${particleColors[0].g},${particleColors[0].b}), 
+		        		 new THREE.Color(${particleColors[1].r}, ${particleColors[1].g},${particleColors[1].b}), 
+		        		 new THREE.Color(${particleColors[2].r}, ${particleColors[2].g},${particleColors[2].b}) ],
+        		gravity: new THREE.Vector3(0.0, ${basicOption.gravity_e}, 0.0),
+        		blurPower : ${basicOption.blurPower}	
+        	});
+        	
+        	//////////////////
+        	// ↓ call this at the timing you want to add Particles
+        	
+			jenP.appearsParticle(${appearsOption.addFrameCount},
+				{
+					//basePos: vector3 ←Edit your position 
+					scale: ${appearsOption.addFrameCount},
+					scaleRandom: ${appearsOption.scaleRandom},
+					// vect: vector3  ←Edit your move vector as need,
+					speed:  ${appearsOption.speed},
+					explose:  ${appearsOption.explose},
+					viscosity:  ${appearsOption.viscosity}
+				}
+			);
+        	`;
         }
     </script>
 
