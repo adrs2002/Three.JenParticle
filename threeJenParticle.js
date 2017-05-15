@@ -26,7 +26,7 @@ class jenParticle extends THREE.Object3D {
             vectorTransform = true
         } = _option;
 
-        this.particleCount = 7500;	//これがパーティクルの作成最大数。多すぎると死ぬ
+        this.particleCount = 8191;	//これがパーティクルの作成最大数。多すぎると死ぬ
         this.clock = new THREE.Clock();
 
         this.geo = new THREE.InstancedBufferGeometry();
@@ -81,14 +81,14 @@ class jenParticle extends THREE.Object3D {
         this.noiseTexture.wrapT = THREE.MirroredRepeatWrapping;
         this.noiseTexture.repeat.set(2, 2);
         this.dummyTexture.needsUpdate = true;
-        
+
         this.material = new THREE.RawShaderMaterial({
             uniforms: {
-                map: { value:  isTextured ? this.noiseTexture : this.dummyTexture},
+                map: { value: isTextured ? this.noiseTexture : this.dummyTexture },
                 time: { value: 0.0 },
                 colors: { type: "v3v", value: colors },
                 gravity: { type: "v3", value: gravity },
-                blurPower: {value: vectorTransform ? 1.0 : 0.0 }
+                blurPower: { value: vectorTransform ? 1.0 : 0.0 }
             },
             vertexShader: this.getVshader(),
             fragmentShader: this.getFshader(),
@@ -148,7 +148,7 @@ class jenParticle extends THREE.Object3D {
                 this.translateArray[i * 3 + 2] = basePos.z;
 
                 //初期サイズと移動方向を決める
-                this.scaleArray[i] = scale + (Math.random()- 0.5) * scaleRandom;
+                this.scaleArray[i] = scale + (Math.random() - 0.5) * scaleRandom;
                 if (explose > 0.0) {
                     const addV = new THREE.Vector3(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5).normalize();
                     vect.lerp(addV, explose);
@@ -356,23 +356,25 @@ class jenParticle extends THREE.Object3D {
             //mvPosition.xyz += tmpPos * max(length(divd) * blurPower, 1.0);
 
 
-
             vec3 movePow =  vec3(movevect.xyz * movevect.w);
             vec4 mvPosition = modelViewMatrix * vec4( translate + movePow + (gravity.xyz * timeF), 1.0 );
 
-            vec3 vertexPos = position * (scale * time * 3.0 ); // ホントはblurPower           
+            vec3 vertexPos = position * (scale * time );           
             vec4 mvVector = vec4(mvPosition.xyz + vertexPos, 1.0);
 
-            vec4 pass1Pos =  projectionMatrix * mvVector;
-            vec4 pass0Pos =  projectionMatrix * mvPosition;
+            vec4 noVectPos =  modelViewMatrix * vec4( translate + (gravity.xyz * timeF), 1.0 );
 
-            vec4 pass2Pos = projectionMatrix * vec4(movePow.xyz, 1.0 );
+            vec4 pass1Pos = projectionMatrix * mvPosition;  // P0
+            vec4 pass2Pos =  projectionMatrix * mvVector;   // B
+            vec4 pass0Pos = projectionMatrix * noVectPos;   // A
 
-            vec3 diff = normalize(pass1Pos.xyz - pass0Pos.xyz);
-            diff = diff.xyz - normalize(pass2Pos.xyz);
-            float f = min(length(diff), 1.0);
+            vec3 BA = pass2Pos.xyz - pass0Pos.xyz;
+            vec3 PA = pass1Pos.xyz - pass0Pos.xyz;
+            vec3 BP = pass2Pos.xyz - pass1Pos.xyz;
+            vec3 Badd = BP * 3.0 * speed;  // ホントはblurPower
+            float f = min(length(BA) / length(PA), 1.0);
 
-            gl_Position = vec4(mix(pass1Pos.x,pass0Pos.x, f), mix(pass1Pos.y,pass0Pos.y, f), mix(pass1Pos.z,pass0Pos.z, f), pass1Pos.w);
+            gl_Position = vec4(mix(pass0Pos.x,pass2Pos.x + Badd.x, f), mix(pass0Pos.y,pass2Pos.y+ Badd.y, f), mix(pass0Pos.z,pass2Pos.z+ Badd.z, f), pass2Pos.w);
 
             vUv = uv * 0.5 + uve;
             vUv2 = uv;
