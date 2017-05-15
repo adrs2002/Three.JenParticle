@@ -130,7 +130,7 @@ class jenParticle extends THREE.Object3D {
         const {
             basePos = new THREE.Vector3(0, 0, 0),
             scale = 1.0,
-            scaleRandom = 0.2, // 大きさのブレを少なくする
+            scaleRandom = 0.2,
             vect = new THREE.Vector3(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5).normalize(),
             // col = new THREE.Vector3(0.3,0,0),
             speed = 0.5,
@@ -174,7 +174,7 @@ class jenParticle extends THREE.Object3D {
 
 
     /** 
-     * this logic is Update Particles. but call from Three.js Scene. you don't need call this.
+     * this logic is Update Particles. call from Three.js Scene, auto. you don't need call this.
      */
     updater() {
         // 1粒毎のアップデート
@@ -203,10 +203,7 @@ class jenParticle extends THREE.Object3D {
 
     }
 
-
     //////////////////////////
-
-
 
     createWhiteTexture(width = 2) {
         const cvs = document.createElement('canvas');
@@ -348,15 +345,6 @@ class jenParticle extends THREE.Object3D {
         void main() {
             float timeF = floor((time - 1.0) * 60.0);
 
-            //vec4 mvPosition = modelViewMatrix * vec4( translate, 1.0 );
-            //vec3 tmpPos = position * (scale + time) + (movevect.xyz * movevect.w) + (gravity.xyz * timeF);
-            //vec3 divd = position + tmpPos;
-            //mvPosition.xyz += tmpPos * max(length(divd) * speed * 0.5 * blurPower, 1.0);
-
-            //vec3 divd = position + vertexPos;
-            //mvPosition.xyz += tmpPos * max(length(divd) * blurPower, 1.0);
-
-
             vec3 movePow =  vec3(movevect.xyz * movevect.w);
             vec4 mvPosition = modelViewMatrix * vec4( translate + movePow + (gravity.xyz * timeF), 1.0 );
 
@@ -365,18 +353,17 @@ class jenParticle extends THREE.Object3D {
 
             vec4 noVectPos =  modelViewMatrix * vec4( translate + (gravity.xyz * timeF), 1.0 );
 
-            vec4 pass1Pos = projectionMatrix * mvPosition;  // P0
+            vec4 pass1Pos = projectionMatrix * mvPosition;  // P
             vec4 pass2Pos =  projectionMatrix * mvVector;   // B
             vec4 pass0Pos = projectionMatrix * noVectPos;   // A
 
             vec3 BA = pass2Pos.xyz - pass0Pos.xyz;
             vec3 PA = pass1Pos.xyz - pass0Pos.xyz;
-            vec3 BP = pass2Pos.xyz - pass1Pos.xyz;
-            vec3 Badd = BP * 3.0 * speed;  // ホントはblurPower
-            float f = length(BA) / length(PA);
-            f = min(pow(f,2.0), 1.0);
+            vec3 Badd = pass2Pos.xyz - pass1Pos.xyz;
+            float f = max(0.0, length(BA) - length(PA));
+            f = mix(1.0,f,blurPower);
 
-            gl_Position = vec4(mix(pass0Pos.x,pass2Pos.x + Badd.x, f), mix(pass0Pos.y,pass2Pos.y+ Badd.y, f), mix(pass0Pos.z,pass2Pos.z+ Badd.z, f), pass2Pos.w);
+            gl_Position = vec4(mix(pass0Pos.x,pass2Pos.x + Badd.x, f), mix(pass0Pos.y,pass2Pos.y+ Badd.y, f), mix(pass0Pos.z,pass2Pos.z+ Badd.z, f), mix(pass0Pos.w,pass2Pos.w, f));
 
             vUv = uv * 0.5 + uve;
             vUv2 = uv;
@@ -406,8 +393,6 @@ class jenParticle extends THREE.Object3D {
             texColor = vec4(f,f,f,f);
             
             float uvDist = length(vec2(vUv2.x - 0.5, vUv2.y - 0.5)) * 2.5;
-
-            // vec4 diffuseColor = vec4(texColor.xyz * mix(mix(colors[0],colors[1], uvDist),   colors[2], vTime).xyz,  (1.0 - uvDist) * timeAlpha * texColor.x);
 
             vec4 diffuseColor = vec4(texColor.xyz * mix( mix(colors[0],colors[2], vTime) , mix(colors[1],colors[2], vTime), uvDist).xyz, max((1.0 - uvDist), 0.0) * ( 1.0 - vTime) * texColor.x);
 
