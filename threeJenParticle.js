@@ -23,7 +23,6 @@ class jenParticle extends THREE.Object3D {
             isTextured = true,
             colors = [new THREE.Color(1.0, 1.0, 0.5), new THREE.Color(0.8, 0.4, 0.0), new THREE.Color(0.2, 0.0, 0.0)],
             gravity = new THREE.Vector3(0.0, -0.01, 0.0),
-            vectorTransform = true,
             blurPower = 1.0
         } = _option;
 
@@ -53,12 +52,12 @@ class jenParticle extends THREE.Object3D {
             this.translateArray[i * 3 + 1] = 0.0;
             this.translateArray[i * 3 + 2] = 0.0;
 
-            //パーティクルの大きさをセットする入れ物
+            //パーティクルの大きさをセットする入れ物。どうせ
             this.scaleArray[i] = 0.0;
 
             //【色】を管理する入れ物
             this.colArray[i * 3 + 0] = 0.0;
-            this.colArray[i * 3 + 1] = 1.0;
+            this.colArray[i * 3 + 1] = 0.0;
             this.colArray[i * 3 + 2] = 0.0;
 
             //出現してからの時間管理の入れ物
@@ -132,7 +131,7 @@ class jenParticle extends THREE.Object3D {
             scale = 1.0,
             scaleRandom = 0.2,
             vect = new THREE.Vector3(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5).normalize(),
-            // col = new THREE.Vector3(0.3,0,0),
+            col = new THREE.Vector3(1.0,1.0,1.0),
             speed = 0.5,
             explose = 0.5,
             viscosity = 0.9,
@@ -161,11 +160,11 @@ class jenParticle extends THREE.Object3D {
                 this.SpeedArray[i] = speed;
                 this.viscosityArray[i] = viscosity;
                 this.lifeTimeArray[i] = lifeTimeFactor;
-                /*
+                
                 this.colArray[i * 3 + 0] = col.x;
                 this.colArray[i * 3 + 1] = col.y;
                 this.colArray[i * 3 + 2] = col.z;
-                */
+                
                 pops++;
                 if (_cnt <= pops) { break; }
             }
@@ -195,7 +194,7 @@ class jenParticle extends THREE.Object3D {
         }
 
         this.geo.attributes.translate.needsUpdate = true;
-        // this.geo.attributes.col.needsUpdate = true;
+        this.geo.attributes.col.needsUpdate = true;
         this.geo.attributes.movevect.needsUpdate = true;
         this.geo.attributes.scale.needsUpdate = true;
         this.geo.attributes.time.needsUpdate = true;
@@ -330,7 +329,7 @@ class jenParticle extends THREE.Object3D {
         attribute vec2 uv;
         attribute vec3 translate;
         attribute vec4 movevect;
-        // attribute vec3 col;
+        attribute vec3 col;
         attribute float scale;
         attribute float speed;
         attribute float time;
@@ -339,7 +338,7 @@ class jenParticle extends THREE.Object3D {
         varying vec2 vUv;
         varying vec2 vUv2;
         varying float vScale;
-        // varying vec3 vCol;
+        varying vec3 vCol;
         varying float vTime;
 
         void main() {
@@ -367,7 +366,7 @@ class jenParticle extends THREE.Object3D {
 
             vUv = uv * 0.5 + uve;
             vUv2 = uv;
-            // vCol = col;
+            vCol = col;
             vScale = scale;
             vTime = time - 1.0;
         }
@@ -384,7 +383,7 @@ class jenParticle extends THREE.Object3D {
         varying vec2 vUv;
         varying vec2 vUv2;
         varying float vScale;
-        // varying vec3 vCol;
+        varying vec3 vCol;
         varying float vTime;
 
         void main() {
@@ -395,7 +394,7 @@ class jenParticle extends THREE.Object3D {
             float uvDist = length(vec2(vUv2.x - 0.5, vUv2.y - 0.5)) * 2.5;
 
             vec4 diffuseColor = vec4(texColor.xyz * mix( mix(colors[0],colors[2], vTime) , mix(colors[1],colors[2], vTime), uvDist).xyz, max((1.0 - uvDist), 0.0) * ( 1.0 - vTime) * texColor.x);
-
+			diffuseColor.rgb *= vCol.rgb;
             gl_FragColor = diffuseColor;
             
         }

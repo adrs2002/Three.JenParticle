@@ -1,3 +1,4 @@
+[日本語](README-JP.md)
 # Three.jenParticle
 
 ====

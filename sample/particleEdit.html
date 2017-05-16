@@ -101,7 +101,6 @@
             isTextured: true,
             colors: particleColors,
             gravity: new THREE.Vector3(0.0, 0.1, 0.0),
-            vectorTransform: false,
             blurPower: 0.2,
             gravity_e: -0.01
         };
@@ -155,17 +154,6 @@
             jenP = new jenParticle(basicOption);
             scene.add(jenP);
 
-            /*
-            jenP2 = new jenParticle({
-                isAlphaAdd: true,
-                isTextured: true,
-                colors: [new THREE.Color(1.0, 1.0, 0.5), new THREE.Color(0.8, 0.4, 0.0), new THREE.Color(0.2, 0.0, 0.0)],
-                gravity: new THREE.Vector3(0.0, 0.01, 0.0),
-                vectorTransform: true
-            });
-            scene.add(jenP2);
-            */
-
             initDat();
 
             controls.update();
@@ -181,19 +169,7 @@
 
             // 追加点その４。パーティクルを追加する。１フレームで追加する数が引数となる。
             jenP.appearsParticle(appearsOption.addFrameCount, appearsOption);
-            /*
-            jenP2.appearsParticle(1,
-                {
-                    //basePos: basePoses[i],
-                    scale: Math.random() * 0.3, // 大きさのブレを少なくする
-                    vect: new THREE.Vector3(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5),
-                    speed: 0.3,
-                    explose: 0.1,
-                    viscosity: 0.8,
-                    lifeTimeFactor: (Math.random() - 0.5) * 0.5 + 1.0
-                }
-            );
-            */
+   
             stats.update();
             render();
         }
@@ -212,45 +188,31 @@
             var gui = new dat.GUI();
 
             //////////////////////////////
-            // 初期値のインスタンスを紐付ける
+            // 初期値のインスタンスを紐付ける	.listen()　つけたら露骨に重いでやんの
             var f1 = gui.addFolder('Basic Option');
 
-            function colChange() {
-                var cols = [
-                    new THREE.Vector3(colors.color0[0] / 255.0, colors.color0[1] / 255.0, colors.color0[2] / 255.0),
-                    new THREE.Vector3(colors.color1[0] / 255.0, colors.color1[1] / 255.0, colors.color1[2] / 255.0),
-                    new THREE.Vector3(colors.color2[0] / 255.0, colors.color2[1] / 255.0, colors.color2[2] / 255.0)
-                ];
-                jenP.material.uniforms.colors.value = cols;
-            }
-
             var c0 = f1.addColor(colors, 'color0');
-            c0.onChange(function (value) { colChange(); });
+            c0.onChange(function (value) { updateMaterial(); });
             var c1 = f1.addColor(colors, 'color1');
-            c1.onChange(function (value) { colChange(); });
+            c1.onChange(function (value) { updateMaterial(); });
             var c2 = f1.addColor(colors, 'color2');
-            c2.onChange(function (value) { colChange(); });
+            c2.onChange(function (value) { updateMaterial(); });
 
             var cAlpha = f1.add(basicOption, 'isAlphaAdd');
             cAlpha.onFinishChange(function (value) {
-                jenP.material.blending = value ? THREE.AdditiveBlending : THREE.NormalBlending;
-                jenP.material.needsUpdate = true;
+				updateMaterial();
             });
             var cTex = f1.add(basicOption, 'isTextured');
             cTex.onFinishChange(function (value) {
-                jenP.material.uniforms.map.value = value ? jenP.noiseTexture : jenP.dummyTexture;
-                jenP.material.needsUpdate = true;
+                updateMaterial();
             });            
             var cGrav = f1.add(basicOption, 'gravity_e', -0.5, 0.5).step(0.01);
             cGrav.onChange(function (value) {
-                var v = new THREE.Vector3(0,value,0);
-                jenP.material.uniforms.gravity.value = v;
-                jenP.material.needsUpdate = true;
+            	updateMaterial();
             });
             var cVTrans = f1.add(basicOption, 'blurPower', 0.01, 1.0).step(0.01);
             cVTrans.onChange(function (value) {
-                jenP.material.uniforms.blurPower.value = value;
-                jenP.material.needsUpdate = true;
+                updateMaterial();
             });
             
             ///////////////////////////
@@ -262,13 +224,71 @@
             f2.add(appearsOption, 'speed', 0.1, 5.0);
             f2.add(appearsOption, 'explose', 0.0, 1.0).step(0.01);
             f2.add(appearsOption, 'viscosity', 0.800, 1.200).step(0.01);
+            
+            var f3 = gui.addFolder('PreSets');
+            var obj = { preSet1:function(){ loadPreset1(); }};
+            f3.add(obj,'preSet1');
+            
+            
+            f3.open();
             f2.open();
             f1.open();
             //////////////////////////////////////////
         }
         
+        function updateMaterial(){
+			jenP.material.blending = basicOption.isAlphaAdd;
+			jenP.material.uniforms.map.value = basicOption.isTextured ? jenP.noiseTexture : jenP.dummyTexture;
+			var v = new THREE.Vector3(0,basicOption.gravity_e,0);
+			jenP.material.uniforms.gravity.value = v;
+			jenP.material.uniforms.blurPower.value = basicOption.blurPower;
+        	
+			var putCols = [
+                new THREE.Vector3(colors.color0[0] / 255.0, colors.color0[1] / 255.0, colors.color0[2] / 255.0),
+                new THREE.Vector3(colors.color1[0] / 255.0, colors.color1[1] / 255.0, colors.color1[2] / 255.0),
+                new THREE.Vector3(colors.color2[0] / 255.0, colors.color2[1] / 255.0, colors.color2[2] / 255.0)
+            ];
+            
+            jenP.material.uniforms.colors.value = putCols;        	
+			jenP.material.needsUpdate = true;
+			
+        }
+        
+        function loadPreset1(){
+        	basicOption.isAlphaAdd = true;
+        	basicOption.isTextured = true;
+        	basicOption.gravity_e = 0.0;
+        	basicOption.blurPower = 0.82;
+         	colors.color0 = [ 255 * 0.5451903403806807, 255 * 0.60094926095364, 255 * 0.7736220472440944];
+		    colors.color1 = [ 255 * 0.6551181102362208, 0, 255 * 0.8];
+		    colors.color2 = [ 255 * 0.02204724409448815, 0, 255 * 0.2];
+		    
+		    for (var i = 0; i < this.gui.__folders.f1.__controllers.length; i++) {
+			    this.gui.__folders.f1.controllers[i].updateDisplay();
+			}
+		    ////
+
+			appearsOption = {
+					addFrameCount : 4,
+					scale: 0.75,
+					scaleRandom: 0.46,
+					speed:  1.9866886688668874,
+					explose:  0.21,
+					viscosity:  0.85
+			};
+		    
+		    for (var i = 0; i < this.gui.__folders.f2.__controllers.length; i++) {
+			    this.gui.__folders.f2.controllers[i].updateDisplay();
+			}
+			
+        	updateMaterial();
+        	generate();
+        }
+        
+        
         function generate() {        	
         	var txt = document.getElementById ('codeput');
+        	
 			txt.value =  `
         	// initialize
         	var jenP = null;
@@ -277,9 +297,10 @@
         	jenP = new jenParticle({
                 isAlphaAdd: ${basicOption.isAlphaAdd},
                 isTextured: ${basicOption.isTextured},
-        		colors: [new THREE.Color(${particleColors[0].r}, ${particleColors[0].g},${particleColors[0].b}), 
-		        		 new THREE.Color(${particleColors[1].r}, ${particleColors[1].g},${particleColors[1].b}), 
-		        		 new THREE.Color(${particleColors[2].r}, ${particleColors[2].g},${particleColors[2].b}) ],
+
+        		colors: [new THREE.Color(${colors.color0[0] / 255.0}, ${colors.color0[1] / 255.0},${colors.color0[2] / 255.0}), 
+		        		 new THREE.Color(${colors.color1[0] / 255.0}, ${colors.color1[1] / 255.0},${colors.color1[2] / 255.0}),
+		        		 new THREE.Color(${colors.color2[0] / 255.0}, ${colors.color2[1] / 255.0},${colors.color2[2] / 255.0})],
         		gravity: new THREE.Vector3(0.0, ${basicOption.gravity_e}, 0.0),
         		blurPower : ${basicOption.blurPower}	
         	});
@@ -290,7 +311,7 @@
 			jenP.appearsParticle(${appearsOption.addFrameCount},
 				{
 					//basePos: vector3 ←Edit your position 
-					scale: ${appearsOption.addFrameCount},
+					scale: ${appearsOption.scale},
 					scaleRandom: ${appearsOption.scaleRandom},
 					// vect: vector3  ←Edit your move vector as need,
 					speed:  ${appearsOption.speed},
@@ -299,6 +320,8 @@
 				}
 			);
         	`;
+        	txt.select();
+        	// document.execCommand('copy');
         }
     </script>
 
