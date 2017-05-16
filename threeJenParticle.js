@@ -109,6 +109,7 @@ class jenParticle extends THREE.Object3D {
         this.geo.addAttribute("uve", new THREE.InstancedBufferAttribute(this.uvEArray, 2, 1));
 
         const mesh = new THREE.Mesh(this.geo, this.material);
+        mesh.frustumCulled = false;
         mesh.scale.set(1, 1, 1);
         this.add(mesh);
 
