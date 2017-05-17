@@ -22,7 +22,7 @@ class jenParticle extends THREE.Object3D {
             isAlphaAdd = true,
             isTextured = true,
             colors = [new THREE.Color(1.0, 1.0, 0.5), new THREE.Color(0.8, 0.4, 0.0), new THREE.Color(0.2, 0.0, 0.0)],
-            gravity = new THREE.Vector3(0.0, -0.01, 0.0),
+            gravity = new THREE.Vector3(0.0, 0.01, 0.0),
             blurPower = 1.0
         } = _option;
 
@@ -73,13 +73,18 @@ class jenParticle extends THREE.Object3D {
             this.uvEArray[i * 2 + 1] = Math.random() * 0.5;
         }
 
-        this.noiseTexture = new THREE.Texture(this.createNoizeTexture(4, 10, 0.65, 256));
-        this.dummyTexture = new THREE.Texture(this.createWhiteTexture(2));
-
-        this.noiseTexture.needsUpdate = true;
+        //generate Noize
+        const noiseSize = 256;
+        this.noiseTexture = new THREE.DataTexture(this.createNoizeTexture(4, 10, 0.65, noiseSize), noiseSize, noiseSize, THREE.RGBAFormat);
         this.noiseTexture.wrapS = THREE.MirroredRepeatWrapping;
         this.noiseTexture.wrapT = THREE.MirroredRepeatWrapping;
         this.noiseTexture.repeat.set(2, 2);
+        this.noiseTexture.needsUpdate = true;
+
+        this.dummyTexture = new THREE.DataTexture(this.createWhiteTexture(2), noiseSize, noiseSize, THREE.RGBAFormat);
+        this.dummyTexture.wrapS = THREE.MirroredRepeatWrapping;
+        this.dummyTexture.wrapT = THREE.MirroredRepeatWrapping;
+        this.dummyTexture.repeat.set(1, 1);
         this.dummyTexture.needsUpdate = true;
 
         this.material = new THREE.RawShaderMaterial({
@@ -132,7 +137,7 @@ class jenParticle extends THREE.Object3D {
             scale = 1.0,
             scaleRandom = 0.2,
             vect = new THREE.Vector3(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5).normalize(),
-            col = new THREE.Vector3(1.0,1.0,1.0),
+            col = new THREE.Vector3(1.0, 1.0, 1.0),
             speed = 0.5,
             explose = 0.5,
             viscosity = 0.9,
@@ -161,11 +166,11 @@ class jenParticle extends THREE.Object3D {
                 this.SpeedArray[i] = speed;
                 this.viscosityArray[i] = viscosity;
                 this.lifeTimeArray[i] = lifeTimeFactor;
-                
+
                 this.colArray[i * 3 + 0] = col.x;
                 this.colArray[i * 3 + 1] = col.y;
                 this.colArray[i * 3 + 2] = col.z;
-                
+
                 pops++;
                 if (_cnt <= pops) { break; }
             }
@@ -206,16 +211,16 @@ class jenParticle extends THREE.Object3D {
     //////////////////////////
 
     createWhiteTexture(width = 2) {
-        const cvs = document.createElement('canvas');
-        cvs.width = cvs.height = width;
-        const ctx = cvs.getContext('2d');
-        const cci = ctx.createImageData(width, width);
-        for (let i = 0; i < width * width; i++) {
-            cci.data[i * 4] = cci.data[i * 4 + 1] = cci.data[i * 4 + 2] = 255;
-            cci.data[i * 4 + 3] = 255;
+        const data = new Uint8Array(4 * width * width);
+        for (let i = 0; i < width; i++) {
+            for (let j = 0; j < width; j++) {
+                for (let m = 0; m < 4; m++) {
+                    data[i * width * 4 + j * 4 + m] = 255;
+                }
+                data[i * width * 4 + j * 4 + 3] = 255;
+            }
         }
-        ctx.putImageData(cci, 0, 0);
-        return cvs;
+        return data;
     }
 
     createNoizeTexture(oct, ofs, per, width) {
@@ -297,22 +302,19 @@ class jenParticle extends THREE.Object3D {
         // create noize texture
         setSeed(new Date().getTime());
         const noiseColor = new Array(width * width);
+        const data = new Uint8Array(4 * width * width);
         for (let i = 0; i < width; i++) {
             for (let j = 0; j < width; j++) {
                 noiseColor[i * width + j] = snoise(i, j, width);
                 noiseColor[i * width + j] *= noiseColor[i * width + j];
+                noiseColor[i * width + j] *= 255;
+                for (let m = 0; m < 3; m++) {
+                    data[i * width * 4 + j * 4 + m] = noiseColor[i * width + j];
+                }
+                data[i * width * 4 + j * 4 + 3] = 255;
             }
         }
-        const cvs = document.createElement('canvas');
-        cvs.width = cvs.height = width;
-        const ctx = cvs.getContext('2d');
-        const cci = ctx.createImageData(width, width);
-        for (let i = 0; i < width * width; i++) {
-            cci.data[i * 4] = cci.data[i * 4 + 1] = cci.data[i * 4 + 2] = noiseColor[i] * 255;
-            cci.data[i * 4 + 3] = 255;
-        }
-        ctx.putImageData(cci, 0, 0);
-        return cvs;
+        return data;
     }
 
     //////////////////////
