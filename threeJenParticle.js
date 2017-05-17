@@ -74,14 +74,14 @@ class jenParticle extends THREE.Object3D {
         }
 
         //generate Noize
-        const noiseSize = 256;
+        const noiseSize = 512;
         this.noiseTexture = new THREE.DataTexture(this.createNoizeTexture(4, 10, 0.65, noiseSize), noiseSize, noiseSize, THREE.RGBAFormat);
         this.noiseTexture.wrapS = THREE.MirroredRepeatWrapping;
         this.noiseTexture.wrapT = THREE.MirroredRepeatWrapping;
         this.noiseTexture.repeat.set(2, 2);
         this.noiseTexture.needsUpdate = true;
 
-        this.dummyTexture = new THREE.DataTexture(this.createWhiteTexture(2), noiseSize, noiseSize, THREE.RGBAFormat);
+        this.dummyTexture = new THREE.DataTexture(this.createWhiteTexture(2), 2, 2, THREE.RGBAFormat);
         this.dummyTexture.wrapS = THREE.MirroredRepeatWrapping;
         this.dummyTexture.wrapT = THREE.MirroredRepeatWrapping;
         this.dummyTexture.repeat.set(1, 1);
