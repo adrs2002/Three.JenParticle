@@ -90,7 +90,7 @@
             renderer = new THREE.WebGLRenderer();
             renderer.setPixelRatio(window.devicePixelRatio);
             renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.setClearColor(0x222222);
+            renderer.setClearColor(0x888888);
             container.appendChild(renderer.domElement);
             if (renderer.extensions.get('ANGLE_instanced_arrays') === false) {
                 // document.getElementById( "notSupported" ).style.display = "";
@@ -107,24 +107,28 @@
             jenP = new jenParticle({
                 isAlphaAdd: false,
                 isTextured: true,
-                colors: [new THREE.Color(1.0, 1.0, 0.5), new THREE.Color(0.8, 0.4, 0.0), new THREE.Color(0.2, 0.0, 0.0)],
-                gravity: new THREE.Vector3(0.0, 0.1, 0.0),
-                vectorTransform: false
-            });
+        		colors: [new THREE.Color(0.7156862745098039, 0.2988217201528822,0.007016532103037269), 
+		        		 new THREE.Color(0.3137254901960784, 0.09444331365764308,0.003075740099961542),
+		        		 new THREE.Color(0.17647058823529416, 0.049307958477508664,0.0069204152249134916)],
+        		gravity: new THREE.Vector3(0.0, 0.22, 0.0),
+        		blurPower : 0.09	
+        	});
             scene.add(jenP);
 
             jenP2 = new jenParticle({
                 isAlphaAdd: true,
                 isTextured: true,
-                colors: [new THREE.Color(1.0, 1.0, 0.5), new THREE.Color(0.8, 0.4, 0.0), new THREE.Color(0.2, 0.0, 0.0)],
-                gravity: new THREE.Vector3(0.0, 0.01, 0.0),
-                vectorTransform: true
-            });
+        		colors: [new THREE.Color(0.63, 0.63,0.2), 
+		        		 new THREE.Color(0.5, 0.25,0.05),
+		        		 new THREE.Color(0.2, 0.05,0)],
+        		gravity: new THREE.Vector3(0.0, 0.1, 0.0),
+        		blurPower : 0.07	
+        	});
             scene.add(jenP2);
 
             /// パーティクル出現位置の設定。
             for (let i = 0; i < 20; i++) {
-                basePoses.push(new THREE.Vector3((Math.random() - 0.5) * 50, 0.0, (Math.random() - 0.5) * 50));
+                basePoses.push(new THREE.Vector3((Math.random() - 0.5) * 100, 0.0, (Math.random() - 0.5) * 100));
             }
             //////////////////////////////////////////
 
@@ -144,26 +148,24 @@
 
                 jenP.appearsParticle(1,
                     {
-                        basePos: basePoses[i],
-                        scale: Math.random() * 0.3 + 2.0, // 大きさのブレを少なくする
-                        vect: new THREE.Vector3(Math.random() - 0.5, Math.random() - 0.5 + 0.5, Math.random() - 0.5),
-                        speed: 0.1,
-                        explose: 0.1,
-                        viscosity: 1.0,
-                        lifeTimeFactor: (Math.random() - 0.5) * 0.5 + 1.0
-                    }
+						basePos: basePoses[i],
+						scale: 1.0,
+						scaleRandom: 0.3,
+						speed:  0.5,
+						explose:  0.3,
+						viscosity:  0.9
+					}
                 );
 
                 jenP2.appearsParticle(1,
-                    {
-                        basePos: basePoses[i],
-                        scale: Math.random() * 0.3, // 大きさのブレを少なくする
-                        vect: new THREE.Vector3(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5),
-                        speed: 0.3,
-                        explose: 0.1,
-                        viscosity: 0.8,
-                        lifeTimeFactor: (Math.random() - 0.5) * 0.5 + 1.0
-                    }
+                   {
+						basePos: basePoses[i],
+						scale: 0.9,
+						scaleRandom: 0.45,
+						speed:  0.5322736380347874,
+						explose:  0.25,
+						viscosity:  0.85
+					}
                 );
             }
 
