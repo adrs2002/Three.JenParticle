@@ -3,7 +3,7 @@
 ====
 
 # Overview 
-Very Easy Particle Sysytem for Three.js
+Very Easy Particle System for Three.js
 	
 ## Demo
 
