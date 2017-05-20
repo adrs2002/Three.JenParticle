@@ -1,4 +1,4 @@
-* [ 日本語 ] (./README-JP.md)
+[ 日本語ReadMe ] (https://github.com/adrs2002/Three.JenParticle/blob/master/README-JP.md)
 # Three.jenParticle
 
 ====
