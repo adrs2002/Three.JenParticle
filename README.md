@@ -9,10 +9,10 @@ Very Easy Particle System for Three.js
 	
 ## Demo
 
-* [demo](http://www001.upp.so-net.ne.jp/adrs2002/JenParticle/particleTest.html)
-* [demo2](http://www001.upp.so-net.ne.jp/adrs2002/JenParticle/particleTest2.html)
+* [demo](http://adrs2002.sakura.ne.jp/particle/sample//particleTest.html)
+* [demo2](http://adrs2002.sakura.ne.jp/particle/sample/particleTest2.html)
 
-* [demo3　Edit GUI](http://www001.upp.so-net.ne.jp/adrs2002/JenParticle/particleEdit.html)
+* [demo3　Edit GUI](http://adrs2002.sakura.ne.jp/particle/sample/particleEdit.html)
 
 ## Requirement
 * [THREE.js](https://github.com/mrdoob/three.js/)
@@ -45,7 +45,7 @@ Very Easy Particle System for Three.js
 
 There is a demo for preview & code generation to make editing easier
 
-* [demo3　Edit GUI](http://www001.upp.so-net.ne.jp/adrs2002/JenParticle/particleEdit.html)
+* [demo3　Edit GUI](http://adrs2002.sakura.ne.jp/particle/sample/particleEdit.html)
 
 When you like it, press "Generate" at the bottom of the screen, copy the text from the text box below,
 Please stick it to the appropriate place.
