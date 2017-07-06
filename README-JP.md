@@ -9,10 +9,10 @@ Three.jsで超！楽にパーティクルを表示するためのアドオンク
 
 ## Demo
 
-* [demo](http://www001.upp.so-net.ne.jp/adrs2002/JenParticle/particleTest.html)
-* [demo2](http://www001.upp.so-net.ne.jp/adrs2002/JenParticle/particleTest2.html)
+* [demo](http://adrs2002.sakura.ne.jp/particle/sample/particleTest.html)
+* [demo2](http://adrs2002.sakura.ne.jp/particle/sample/particleTest2.html)
 
-* [demo3　編集GUI](http://www001.upp.so-net.ne.jp/adrs2002/JenParticle/particleEdit.html)
+* [demo3　編集GUI](http://adrs2002.sakura.ne.jp/particle/sample/particleEdit.html)
 
 ## Requirement　必要なもの
 * [THREE.js](https://github.com/mrdoob/three.js/)
@@ -47,7 +47,7 @@ Three.jsで超！楽にパーティクルを表示するためのアドオンク
 
 編集を容易にするため、プレビュー＆コード生成用のデモがあります
 
-* [demo3　編集GUI](http://www001.upp.so-net.ne.jp/adrs2002/JenParticle/particleEdit.html)
+* [demo3　編集GUI](http://adrs2002.sakura.ne.jp/particle/sample/particleEdit.html)
 
 気に入った形になったら、画面下の「Generate」を押し、下のテキストボックスから生成されたテキストをコピーし、
 適切な場所に張り付けてください。  
