@@ -1,0 +1,147 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+ <title>three.js webgl - Particle Plugin Sample</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+
+    <style>
+        body {
+            font-family: Monospace;
+            background-color: #000;
+            color: #fff;
+            margin: 0px;
+            overflow: hidden;
+        }
+
+        #info {
+            color: #fff;
+            position: absolute;
+            top: 10px;
+            width: 100%;
+            text-align: center;
+            z-index: 100;
+            display: block;
+        }
+
+        #info a,
+        .button {
+            color: #f00;
+            font-weight: bold;
+            text-decoration: underline;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="info">
+		<a href="http://threejs.org" target="_blank">three.js</a> Particle Effect Test<br />
+		create by <a href="https://github.com/adrs2002/Three.JenParticleStar" target="_blank"> Jey-en : Repo </a>
+	</div>
+    <div id="canvase3d"></div>
+
+    <!-- <script src="three.min.js"></script> -->
+    <script src="../three.min.js"></script>
+    <script src="../lib/OrbitControls.js"></script>
+
+    <!-- 追加点その１。プラグインを読む -->
+    <script src="../threeJenParticleStar.js"></script>
+
+    <script src="../lib/Detector.js"></script>
+    <script src="../lib/stats.min.js"></script>
+    <script src="../lib/dat.gui.min.js"></script>
+    <script>
+
+        var StringBuffer = function (string) {
+            this.buffer = [];
+            this.append = function (string) { this.buffer.push(string); return this; };
+            this.toString = function () { return this.buffer.join(''); };
+            if (string) { this.append(string); }
+        };
+
+        if (!Detector.webgl) Detector.addGetWebGLMessage();
+        var container, stats, controls;
+        var camera, scene, renderer;
+        var clock = new THREE.Clock();
+        var gui = new dat.GUI();
+  
+        var d = new Date();
+
+        scene = new THREE.Scene();
+        //追加点その２。オブジェクトを用意。後々アクセスできるように、変数内ではなく、こんな感じでnullで用意
+        var jenP = null;
+
+        init();
+
+        function init() {
+
+            LastDateTime = Date.now();
+
+            container = document.createElement('div');
+
+            document.body.appendChild(container);
+            camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 2000);
+
+            // grid
+            var gridHelper = new THREE.GridHelper(14, 1, 0x303030, 0x303030);
+            gridHelper.position.set(0, 0, 0);
+            scene.add(gridHelper);
+            // stats
+            stats = new Stats();
+            container.appendChild(stats.dom);
+            
+            renderer = new THREE.WebGLRenderer();
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setClearColor(0x222222);
+            container.appendChild(renderer.domElement);
+		    if ( renderer.extensions.get( 'ANGLE_instanced_arrays' ) === false ) {
+				// document.getElementById( "notSupported" ).style.display = "";
+				return false;
+			}
+
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.target.set(0, 0, 0);
+            camera.position.set(0, 2, 30);
+            camera.up.set(0, 1, 0);
+
+            //////////////////////////////////////////////////
+            //追加点その３。new宣言をして、sceneにaddする。
+            jenP = new jenParticleStar();
+            scene.add(jenP);
+            //////////////////////////////////////////
+
+            controls.update();
+            window.addEventListener('resize', onWindowResize, false);
+            animate();
+
+        }
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+        //
+        function animate() {
+
+            requestAnimationFrame(animate);
+
+            // 追加点その４。パーティクルを追加する。１フレームで追加する数が引数となる。
+            jenP.appearsParticle(1);
+
+            stats.update();
+            render();
+        }
+        
+        function render() {
+            //renderer.setFaceCulling(THREE.CullFaceFront, THREE.FrontFaceDirectionCW);
+            renderer.render(scene, camera);
+        }
+
+    </script>
+
+</body>
+
+</html>

@@ -23,10 +23,11 @@ class jenParticle extends THREE.Object3D {
             isTextured = true,
             colors = [new THREE.Color(1.0, 1.0, 0.5), new THREE.Color(0.8, 0.4, 0.0), new THREE.Color(0.2, 0.0, 0.0)],
             gravity = new THREE.Vector3(0.0, 0.01, 0.0),
-            blurPower = 1.0
+            blurPower = 1.0,
+            makeCount = 1024    //これがパーティクルの作成最大数。多すぎると死ぬ
         } = _option;
 
-        this.particleCount = 8191;	//これがパーティクルの作成最大数。多すぎると死ぬ
+        this.particleCount = makeCount;	
         this.clock = new THREE.Clock();
 
         this.geo = new THREE.InstancedBufferGeometry();
