@@ -1,0 +1,91 @@
+<html>
+
+<head>
+    <style>
+        body {
+            font-family: Monospace;
+            background-color: #000;
+            color: #fff;
+            margin: 0px;
+            overflow: hidden;
+        }
+
+        #info {
+            color: #fff;
+            position: absolute;
+            top: 10px;
+            width: 100%;
+            text-align: center;
+            z-index: 100;
+            display: block;
+        }
+
+        #info a,
+        .button {
+            color: #f00;
+            font-weight: bold;
+            text-decoration: underline;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <script src="../three.min.js"></script>
+    <script>
+        var camera, scene, renderer;
+        var clock = new THREE.Clock();
+        scene = new THREE.Scene();
+
+        var container, renderTarget;
+
+        init();
+
+        function init() {
+
+            LastDateTime = Date.now();
+
+            container = document.createElement('div');
+
+            document.body.appendChild(container);
+            camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 2000);
+
+            renderer = new THREE.WebGLRenderer();
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setClearColor(0x222222);
+            container.appendChild(renderer.domElement);
+
+            renderTarget = createOffScreen();
+
+            requestAnimationFrame(render);
+        }
+
+        function render() {
+            requestAnimationFrame(render);
+            renderer.render(subScene, subCamera, renderTarget);
+            // Finally, draw to the screen
+            renderer.render(scene, camera);
+        }
+
+        /*************/
+
+        function createOffScreen() {
+            var width = 2,
+                height = 2;
+
+            subScene = new THREE.Scene();
+            subCamera = new THREE.PerspectiveCamera(60, width / height, 0.1, 1000);
+            subCamera.position.z = 10;
+
+            return new THREE.WebGLRenderTarget(width, height, {
+                magFilter: THREE.NearestFilter,
+                minFilter: THREE.NearestFilter,
+                wrapS: THREE.ClampToEdgeWrapping,
+                wrapT: THREE.ClampToEdgeWrapping
+            });
+        }
+    </script>
+</body>
+
+</html>
