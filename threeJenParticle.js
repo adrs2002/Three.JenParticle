@@ -1,6 +1,6 @@
 "use strict";
 
-// import THREE from 'three'
+// import * as THREE from './three.module'
 
 /**
  * @author Jey-en  https://github.com/adrs2002

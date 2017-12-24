@@ -56,7 +56,8 @@
             renderer.setClearColor(0x222222);
             container.appendChild(renderer.domElement);
 
-            renderTarget = createOffScreen();
+            renderTarget = createOffScreen(2, 2);
+            createGpuSortingMesh(renderTarget);
 
             requestAnimationFrame(render);
         }
@@ -70,9 +71,9 @@
 
         /*************/
 
-        function createOffScreen() {
-            var width = 2,
-                height = 2;
+        function createOffScreen(w, h) {
+            var width = w ? w : 2,
+                height = h ? h : 2;
 
             subScene = new THREE.Scene();
             subCamera = new THREE.PerspectiveCamera(60, width / height, 0.1, 1000);
@@ -85,6 +86,66 @@
                 wrapT: THREE.ClampToEdgeWrapping
             });
         }
+
+        function createGpuSortingMesh(_render) {
+            const geo = new THREE.InstancedBufferGeometry();
+            geo.copy(new THREE.CircleBufferGeometry(1, 8));
+
+            const colors = [new THREE.Color(1.0, 1.0, 0.5), new THREE.Color(0.8, 0.4, 0.0), new THREE.Color(0.2, 0.0, 0.0)];
+
+            const material = new THREE.RawShaderMaterial({
+                uniforms: {
+                    colors: {
+                        type: "v3v",
+                        value: colors
+                    }
+                },
+                vertexShader: getVshader(),
+                fragmentShader: getFshader(),
+                depthTest: false,
+                depthWrite: false,
+                transparent: false,
+                // side: THREE.DoubleSide,
+                depthFunc: THREE.NeverDepth,
+                blending: THREE.NormalBlending
+            });
+
+            const mesh = new THREE.Mesh(geo, material);
+            mesh.frustumCulled = false;
+            mesh.scale.set(1, 1, 1);
+            subScene.add(mesh);
+        }
+
+        function getVshader(){
+            return `
+            precision highp float;
+            
+            uniform vec2 resolution;
+
+            varying vec2 vUv;
+            varying vec3 vCol;
+            void main() {
+                vec2 p = (gl_FragCoord.xy / resolution) * 2.0 - 1.0;
+                gl_FragColor = vec4(p, 0.0, 0.0);
+            }
+            `;
+        }
+
+        function getFshader(){
+            return `
+            precision highp float;
+
+            uniform vec3 colors[3];
+
+            varying vec2 vUv;
+            varying vec3 vCol;
+            void main() {
+                gl_FragColor = vec4(0.0, 0.0, 1.0, 1.0);
+            }
+            `;
+        }
+
+
     </script>
 </body>
 
